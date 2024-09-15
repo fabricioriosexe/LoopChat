@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoopChat</title>
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+<section class="flex h-screen overflow-hidden">
+    <!-- Left panel - Chats -->
+    <div class="bg-white xl:w-3/12 lg:w-4/12 w-full p-6">
+        <h3 class="text-2xl mb-8">Chat en línea</h3>
+        <div class="overflow-auto h-4/5" id="chatList">
+            <!-- Los mensajes cargados desde la base de datos se colocarán aquí -->
+        </div>
+    </div>
+
+    <!-- Right panel - Message conversation -->
+    <div class="bg-gray-100 xl:w-9/12 lg:w-8/12 hidden lg:block">
+        <div class="py-6 px-20 border-b">
+            <div class="flex">
+                <div class="flex flex-grow">
+                    <div>
+                        <p class="font-medium" id="chatTitle">Chat con...</p>
+                        <small class="text-gray-500">Online</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="py-6 px-20 h-3/4 overflow-auto" id="messageContainer">
+            <!-- Aquí se colocarán los mensajes del chat -->
+        </div>
+        <div class="flex py-6 px-20 border-t">
+            <div class="w-4/5">
+                <input type="text" id="messageInput" class="rounded-sm px-4 py-2 focus:outline-none bg-gray-100 w-full" placeholder="Escribe tu mensaje...">
+            </div>
+            <div class="w-1/5 flex justify-end">
+                <button class="bg-blue-500 text-white rounded px-4 py-2" id="sendMessage">Enviar</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const messageContainer = document.getElementById('messageContainer');
+    const chatList = document.getElementById('chatList');
+    const sendMessage = document.getElementById('sendMessage');
+    const messageInput = document.getElementById('messageInput');
+
+    // Cargar mensajes de MySQL (implementado desde el backend)
+    async function loadMessages() {
+        const response = await fetch('/api/chat/mensajes');  // Corregido el endpoint
+        const data = await response.json();
+        data.forEach(message => {
+            const messageElement = document.createElement('div');
+            messageElement.innerHTML = `
+                <div class="flex mb-12">
+                    <img src="img/user-${message.id}.jpg" class="self-end rounded-full w-12 mr-4"> <!-- Corregido a message.id -->
+                    <div class="flex flex-col">
+                        <div class="bg-white p-6 rounded-3xl w-96 shadow-sm mb-2">
+                            <p class="font-medium mb-1">${message.senderName}</p>
+                            <small class="inline-block text-gray-500 mb-1">${message.content}</small>
+                        </div>
+                        <small class="text-gray-500">${new Date(message.timestamp).toLocaleString()}</small> <!-- Se formatea el timestamp -->
+                    </div>
+                </div>
+            `;
+            messageContainer.appendChild(messageElement);
+        });
+    }
+
+    // Enviar mensaje (se guardará en MySQL)
+    sendMessage.addEventListener('click', async () => {
+        const message = messageInput.value;
+        if (message) {
+            await fetch('/api/chat/enviar', {  // Corregido el endpoint
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ content: message, senderName: 'User1' }) // Debes asignar un senderName aquí
+            });
+            messageInput.value = '';
+            loadMessages(); // Volver a cargar los mensajes
+        }
+    });
+
+    // Cargar los mensajes al iniciar
+    loadMessages();
+</script>
+</body>
+</html>

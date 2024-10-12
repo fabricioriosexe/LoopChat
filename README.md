@@ -1,4 +1,8 @@
-# NgChatSocket
+# LoopChat
+
+
+![image](https://github.com/user-attachments/assets/54c3d38f-c1a4-47ee-8fa3-c47b037c9d20)
+
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.8.
 
